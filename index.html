@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pulse — Admin Dashboard</title>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</head>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap');
+
+:root {
+  --bg: #0E1320;
+  --surface: #161D2E;
+  --surface-2: #1D263B;
+  --border: #2A3450;
+  --text: #E7EAF3;
+  --text-dim: #8B93A8;
+  --amber: #F2A93B;
+  --teal: #35D0BA;
+  --danger: #E8636B;
+  --radius: 12px;
+  --font-display: 'Sora', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  background: var(--bg);
+  background-image:
+    radial-gradient(circle at 15% 0%, rgba(53,208,186,0.08), transparent 40%),
+    radial-gradient(circle at 85% 20%, rgba(242,169,59,0.06), transparent 40%);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; }
+
+.app {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: 100vh;
+}
+
+/* ---------- Sidebar ---------- */
+.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 24px 18px;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.15rem;
+  letter-spacing: 0.02em;
+  margin-bottom: 36px;
+}
+.brand-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--teal);
+  box-shadow: 0 0 0 4px rgba(53,208,186,0.15);
+}
+
+nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+
+.nav-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: var(--text-dim);
+  font-weight: 500;
+  font-size: 0.92rem;
+  transition: background .15s ease, color .15s ease;
+}
+.nav-item .ico { font-size: 1rem; width: 18px; text-align: center; opacity: .8; }
+.nav-item:hover { background: var(--surface-2); color: var(--text); }
+.nav-item.active { background: var(--surface-2); color: var(--amber); }
+.nav-item.active .ico { color: var(--amber); }
+
+.sidebar-footer { border-top: 1px solid var(--border); padding-top: 16px; }
+.user-chip { display: flex; align-items: center; gap: 10px; }
+.avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--teal), var(--amber));
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono); font-size: .75rem; font-weight: 600; color: #0E1320;
+}
+.uname { font-size: .85rem; font-weight: 600; }
+.urole { font-size: .72rem; color: var(--text-dim); }
+
+/* ---------- Main ---------- */
+.main { padding: 20px 28px 40px; min-width: 0; }
+
+.topbar {
+  display: flex; align-items: center; gap: 16px;
+  padding: 6px 0 22px;
+}
+.topbar h1 {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 0;
+  flex: 1;
+}
+.icon-btn {
+  display: none;
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text); border-radius: 8px; width: 36px; height: 36px;
+  font-size: 1rem; cursor: pointer;
+}
+.topbar-right { display: flex; align-items: center; gap: 8px; color: var(--text-dim); font-size: .8rem; }
+.live-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--teal);
+  animation: pulse 1.8s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(53,208,186,0.5); }
+  50% { box-shadow: 0 0 0 6px rgba(53,208,186,0); }
+}
+
+/* ---------- Cards ---------- */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+
+.card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.card-header h2 { font-family: var(--font-display); font-size: 1rem; font-weight: 600; margin: 0; }
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.stat-card { position: relative; overflow: hidden; }
+.stat-label { font-size: .78rem; color: var(--text-dim); margin-bottom: 8px; }
+.stat-value {
+  font-family: var(--font-mono);
+  font-size: 1.9rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.stat-trend { font-size: .75rem; color: var(--text-dim); margin-top: 6px; }
+.stat-trend.up { color: var(--teal); }
+
+.panel-grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 16px;
+}
+
+/* ---------- Users table ---------- */
+.users-header { flex-wrap: wrap; gap: 12px; }
+.users-controls { display: flex; gap: 8px; flex-wrap: wrap; }
+.users-controls input, .users-controls select {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: .85rem;
+  font-family: var(--font-body);
+}
+.users-controls input:focus, .users-controls select:focus,
+button:focus-visible, .nav-item:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.btn-primary {
+  background: var(--amber);
+  color: #14100a;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-weight: 600;
+  font-size: .85rem;
+  cursor: pointer;
+  transition: transform .1s ease, filter .15s ease;
+}
+.btn-primary:hover { filter: brightness(1.08); }
+.btn-primary:active { transform: scale(0.97); }
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: .85rem;
+  cursor: pointer;
+}
+
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: .87rem; }
+thead th {
+  text-align: left;
+  color: var(--text-dim);
+  font-weight: 500;
+  font-size: .75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+tbody td { padding: 12px; border-bottom: 1px solid var(--border); }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr { transition: background .12s ease; }
+tbody tr:hover { background: var(--surface-2); }
+
+.badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 9px; border-radius: 999px;
+  font-size: .72rem; font-weight: 600;
+}
+.badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; }
+.badge.active { background: rgba(53,208,186,0.12); color: var(--teal); }
+.badge.active::before { background: var(--teal); }
+.badge.inactive { background: rgba(139,147,168,0.12); color: var(--text-dim); }
+.badge.inactive::before { background: var(--text-dim); }
+.badge.pending { background: rgba(242,169,59,0.12); color: var(--amber); }
+.badge.pending::before { background: var(--amber); }
+
+.row-del {
+  background: transparent; border: none; color: var(--text-dim);
+  cursor: pointer; font-size: 0.9rem;
+}
+.row-del:hover { color: var(--danger); }
+
+.muted { color: var(--text-dim); font-size: .9rem; line-height: 1.5; }
+
+/* ---------- Views ---------- */
+.view { display: none; animation: fadein .25s ease; }
+.view.active { display: block; }
+@keyframes fadein { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ---------- Modal ---------- */
+.modal-backdrop {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(6,8,14,0.6);
+  align-items: center; justify-content: center;
+  z-index: 50;
+}
+.modal-backdrop.show { display: flex; }
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px;
+  width: 340px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.modal h3 { font-family: var(--font-display); margin: 0 0 4px; }
+.modal label { display: flex; flex-direction: column; gap: 6px; font-size: .82rem; color: var(--text-dim); }
+.modal input, .modal select {
+  background: var(--surface-2); border: 1px solid var(--border); color: var(--text);
+  border-radius: 8px; padding: 8px 10px; font-size: .88rem; font-family: var(--font-body);
+}
+.modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px; }
+
+/* ---------- Toast ---------- */
+.toast {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--surface-2); border: 1px solid var(--border);
+  padding: 10px 18px; border-radius: 8px; font-size: .85rem;
+  opacity: 0; pointer-events: none; transition: opacity .2s ease, transform .2s ease;
+  z-index: 60;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 980px) {
+  .panel-grid { grid-template-columns: 1fr; }
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 760px) {
+  .app { grid-template-columns: 1fr; }
+  .sidebar {
+    position: fixed; left: 0; top: 0; height: 100vh; width: 220px;
+    transform: translateX(-100%);
+    transition: transform .2s ease;
+    z-index: 40;
+  }
+  .sidebar.open { transform: translateX(0); }
+  .icon-btn { display: block; }
+  .main { padding: 16px; }
+  .stat-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat-value { font-size: 1.5rem; }
+}
+
+@media (max-width: 460px) {
+  .stat-grid { grid-template-columns: 1fr; }
+  .users-controls { width: 100%; }
+  .users-controls input { flex: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}
+
+</style>
+<body>
+
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <span class="brand-dot"></span>
+      <span>Pulse</span>
+    </div>
+    <nav>
+      <a href="#" class="nav-item active" data-view="overview"><span class="ico">◧</span>Overview</a>
+      <a href="#" class="nav-item" data-view="users"><span class="ico">◍</span>Users</a>
+      <a href="#" class="nav-item" data-view="settings"><span class="ico">◔</span>Settings</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <div class="avatar">DA</div>
+        <div>
+          <div class="uname">Dayo Admin</div>
+          <div class="urole">Administrator</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <header class="topbar">
+      <button id="menuToggle" class="icon-btn" aria-label="Toggle menu">☰</button>
+      <h1 id="viewTitle">Overview</h1>
+      <div class="topbar-right">
+        <span class="live-dot"></span>
+        <span class="live-label">Live</span>
+      </div>
+    </header>
+
+    <!-- OVERVIEW VIEW -->
+    <section id="view-overview" class="view active">
+      <div class="stat-grid">
+        <div class="card stat-card">
+          <div class="stat-label">Total Users</div>
+          <div class="stat-value" id="statUsers">—</div>
+          <div class="stat-trend up" id="statGrowth">—</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-label">Active Now</div>
+          <div class="stat-value" id="statActive">—</div>
+          <div class="stat-trend">of total</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-label">Pending</div>
+          <div class="stat-value" id="statPending">—</div>
+          <div class="stat-trend">awaiting review</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-label">Revenue (30d)</div>
+          <div class="stat-value" id="statRevenue">—</div>
+          <div class="stat-trend up">this period</div>
+        </div>
+      </div>
+
+      <div class="panel-grid">
+        <div class="card chart-card">
+          <div class="card-header">
+            <h2>Activity — last 30 days</h2>
+          </div>
+          <canvas id="activityChart" height="110"></canvas>
+        </div>
+        <div class="card">
+          <div class="card-header"><h2>Role distribution</h2></div>
+          <canvas id="roleChart" height="220"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- USERS VIEW -->
+    <section id="view-users" class="view">
+      <div class="card">
+        <div class="card-header users-header">
+          <h2>Users</h2>
+          <div class="users-controls">
+            <input id="searchInput" type="text" placeholder="Search name or email…">
+            <select id="statusFilter">
+              <option value="all">All statuses</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+              <option value="pending">Pending</option>
+            </select>
+            <button id="addUserBtn" class="btn-primary">+ Add user</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table id="usersTable">
+            <thead>
+              <tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Joined</th><th></th></tr>
+            </thead>
+            <tbody id="usersBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SETTINGS VIEW -->
+    <section id="view-settings" class="view">
+      <div class="card">
+        <div class="card-header"><h2>Settings</h2></div>
+        <p class="muted">This is a starter view — wire up whatever settings your app needs here (profile, API keys, notification preferences, theme, etc).</p>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Add user modal -->
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal">
+    <h3>Add user</h3>
+    <label>Name<input id="newName" type="text"></label>
+    <label>Email<input id="newEmail" type="email"></label>
+    <label>Role
+      <select id="newRole">
+        <option>Admin</option><option>Editor</option><option>Viewer</option><option>Analyst</option>
+      </select>
+    </label>
+    <div class="modal-actions">
+      <button id="cancelAdd" class="btn-ghost">Cancel</button>
+      <button id="confirmAdd" class="btn-primary">Add</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>
